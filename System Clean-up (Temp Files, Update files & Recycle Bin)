@@ -1,0 +1,23 @@
+# Define a list of system drive letters to clean up
+$drives = Get-WmiObject Win32_LogicalDisk | Where-Object { $_.DriveType -eq 3 } | Select-Object -ExpandProperty DeviceID
+
+# Loop through each system drive and delete temporary files, update files, and empty the recycle bin
+foreach ($drive in $drives) {
+    # Delete temporary files
+    $tempFolder = "$drive\Windows\Temp"
+    $logsFolder = "$drive\Windows\Logs"
+    Remove-Item $tempFolder\* -Recurse -Force
+    Remove-Item $logsFolder\* -Recurse -Force
+
+    # Delete previously downloaded update files
+    $updateFolder = "$drive\Windows\SoftwareDistribution\Download"
+    if (Test-Path $updateFolder) {
+        Remove-Item $updateFolder\* -Recurse -Force
+    }
+
+    # Empty the recycle bin
+    $RecycleBin = New-Object -ComObject Shell.Application
+    $RecycleBin.NameSpace(0).Items() | foreach {
+        $RecycleBin.NameSpace(0).MoveHere($_.Path, $null)
+    }
+}
