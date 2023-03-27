@@ -1,0 +1,16 @@
+$DCUPaths = @(
+    "C:\Program Files (x86)\Dell\CommandUpdate\dcu-cli.exe",
+    "C:\Program Files\Dell\CommandUpdate\dcu-cli.exe"
+)
+
+# Check if the Dell Command Update executable exists in any of the possible paths
+$DCUPath = $DCUPaths | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+if ($DCUPath) {
+    # If it exists, run the update command
+    & $DCUPath /applyUpdates
+    Write-Host "Dell Command Update has been updated."
+} else {
+    # If it doesn't exist, display an error message
+    Write-Host "Dell Command Update executable not found. Please install Dell Command Update."
+}
