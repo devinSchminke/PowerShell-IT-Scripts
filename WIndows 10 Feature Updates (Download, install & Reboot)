@@ -1,7 +1,21 @@
 $dir = 'C:\_Windows_FU\packages'
-mkdir $dir
-$webClient = New-Object System.Net.WebClient
-$url = 'https://go.microsoft.com/fwlink/?LinkID=799445 '
-$file = "$($dir)\Win10Upgrade.exe"
-$webClient.DownloadFile($url,$file)
-Start-Process -FilePath $file -ArgumentList '/quietinstall /skipeula /auto upgrade /copylogs $dir'
+$downloadUrl = 'https://go.microsoft.com/fwlink/?LinkID=799445'
+$downloadPath = Join-Path $dir 'Win10Upgrade.exe'
+$installArgs = '/quietinstall /skipeula /auto upgrade /copylogs'
+
+# Ensure the directory exists or create it
+if (-not (Test-Path -Path $dir -PathType Container)) {
+    New-Item -ItemType Directory -Path $dir -Force
+}
+
+# Use Try-Catch to handle exceptions during the download
+try {
+    $webClient = New-Object System.Net.WebClient
+    $webClient.DownloadFile($downloadUrl, $downloadPath)
+
+    # Start the installation process
+    Start-Process -FilePath $downloadPath -ArgumentList $installArgs
+}
+catch {
+    Write-Host "Failed to download or install the Windows 10 upgrade: $_.Exception.Message"
+}
