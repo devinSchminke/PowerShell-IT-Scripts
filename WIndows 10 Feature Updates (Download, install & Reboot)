@@ -10,12 +10,18 @@ if (-not (Test-Path -Path $dir -PathType Container)) {
 
 # Use Try-Catch to handle exceptions during the download
 try {
-    $webClient = New-Object System.Net.WebClient
-    $webClient.DownloadFile($downloadUrl, $downloadPath)
+    if (-not (Test-Path $downloadPath)) {
+        $webClient = New-Object System.Net.WebClient
+        $webClient.DownloadFile($downloadUrl, $downloadPath)
+    }
 
-    # Start the installation process
-    Start-Process -FilePath $downloadPath -ArgumentList $installArgs
+    # Start the installation process silently
+    Start-Process -FilePath $downloadPath -ArgumentList $installArgs -NoNewWindow -Wait
+
+    # Display a success message
+    Write-Host "Windows 10 upgrade started successfully. \n Please check back later to confirm the system is at the newest feature update."
 }
 catch {
-    Write-Host "Failed to download or install the Windows 10 upgrade: $_.Exception.Message"
+    # Handle errors as needed
+    Write-Host "Failed to download or install the Windows 10 upgrade: $($_.Exception.Message)"
 }
